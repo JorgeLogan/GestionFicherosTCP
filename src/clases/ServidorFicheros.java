@@ -145,7 +145,13 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 		
 	// Funcion para bajar un archivo de la zona critica, a una carpeta local
 	protected void descargar() {
-			
+		String archivo = this.listadoFicheros.getSelectedValue();
+		
+		if(archivo == null) return;
+		System.out.println("Intentamos descargar el fichero " + archivo);
+	
+		byte[] buffer = this.carpeta.cargarArchivo(archivo);
+		DAOArchivos.grabarEnDirectorio(buffer, archivo);
 	}
 
 	// Para saber si existe un archivo
@@ -154,15 +160,10 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 		return arch.exists();
 	}
 	
-	// Para grabar un archivo en la carpeta
-	public void subirArchivo(File archivo) {
-		
-	}
 	
 	@Override
 	protected void clickDescargar() {
-		// TODO Auto-generated method stub
-		
+		this.descargar();
 	}
 
 	@Override
@@ -170,7 +171,6 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 		// TODO Auto-generated method stub
 		this.clickDesconectar();
 		this.dispose();
-		
 	}
 
 	@Override
@@ -189,7 +189,6 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 		else {
 			JOptionPane.showMessageDialog(this,"No se pudo conectar, lo siento");
 		}
-		
 	}
 
 	@Override

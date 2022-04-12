@@ -152,9 +152,8 @@ public class ClienteFicheros extends ClaseBase{
 					" ya existe... ¿ Quieres sobreescribir?") == JOptionPane.OK_OPTION) {
 			
 				System.out.println("Acepta sobreescribir");
-				
+				// Mandamos grabar el archivo
 				this.enviarServidorSubir(archivo);
-			
 			}
 			else {
 				System.out.println("No acepta sobreescribir, asi que no hacemos nada");
@@ -163,38 +162,62 @@ public class ClienteFicheros extends ClaseBase{
 		else { // No existia el archivo, asi que lo grabo sin medias tintas :)
 			this.enviarServidorSubir(archivo);
 		}
-		
 	}
 
+	// Funcion para enviar un archivo al servidor para grabarlo en la zona critica.
+	// Tambien recibira paquete de vuelta con la info de la carpeta actualizada
 	public void enviarServidorSubir(File archivo) {
 		// Preparo un paquete para subir el fichero
 		byte[] buffer = DAOArchivos.convertirFileToBytes(archivo);
 		Paquete paquete = new Paquete(OPCIONES.SUBIR, buffer, archivo.getName());
 		
-		// Intento enviar el objeto
-		try {
-			this.objSalida = new ObjectOutputStream(this.socketCliente.getOutputStream());
-			this.objSalida.writeObject(paquete);
-			
-			// Y ahora, espero respuesta, en la que recibiré la carpeta actualizada
-			//this.objEntrada = new ObjectInputStream(this.socketCliente.getInputStream());
-			System.out.println("Esperamos por el paquete respuesta");
-			paquete = (Paquete)this.objEntrada.readObject();
+		// Y ahora usamos nuestro propio amazon y enviamos el paquete y esperamos respuesta
+		Paquete respuesta = this.enviarPaqueteParaRecibirRespuesta(paquete);
 		
+		if(respuesta != null) {
 			// Limpiamos el listado, y pasamos los elementos recibidos en el paquete
 			this.modeloFicheros.clear();
 			for(String nombre : paquete.getArchivos()) this.modeloFicheros.addElement(nombre);
-			System.out.println("recibida respuesta y actualizados los datos");
-		} 
-		catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("recibida respuesta y actualizados los datos");	
 		}
 	}
 	
+	// Funcion para descargar el fichero seleccionado del JList
 	@Override
 	protected void descargar() {
-		// TODO Auto-generated method stub
+		String archivo = this.listadoFicheros.getSelectedValue();
 		
+		if(archivo == null) return;
+		System.out.println("Intentamos descargar el fichero " + archivo);
+		
+		// Praparamos el paquete de envio
+		Paquete paquete = new Paquete(OPCIONES.DESCARGAR, archivo);
+		
+		// Lo enviamos y recibimos respuesta
+		Paquete respuesta = this.enviarPaqueteParaRecibirRespuesta(paquete);
+	
+		// Si la respuesta no es null, ha ido bien, e intentaremos guardar el fichero
+		if(respuesta != null) {
+			DAOArchivos.grabarEnDirectorio(respuesta.getBuffer(), respuesta.getNombreArchivo());
+		}
+	}
+	
+	private Paquete enviarPaqueteParaRecibirRespuesta(Paquete paquete) {
+		Paquete respuesta = null;
+		
+		try {
+			// Preparamos y enviamos el paquete.
+			this.objSalida = new ObjectOutputStream(this.socketCliente.getOutputStream());
+			this.objSalida.writeObject(paquete);
+			
+			// Ya lo enviamos, ahora esperamos respuesta			
+			respuesta = (Paquete)this.objEntrada.readObject();
+		}
+		catch(Exception e) {
+			
+		}
+		
+		// Devolvemos la respuesta o null si fallo algo
+		return respuesta;
 	}
 }

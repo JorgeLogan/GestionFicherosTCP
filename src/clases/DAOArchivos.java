@@ -8,6 +8,7 @@ import javax.swing.JFileChooser;
 
 public class DAOArchivos {
 
+	// Para cargar un archivo con un flie chooser
 	public static File getArchivo() {
 		File archivo = null;
 		JFileChooser selector = new JFileChooser();
@@ -17,7 +18,31 @@ public class DAOArchivos {
 		return archivo;
 	}
 	
-	// Para grabar un archivo basado en un array de bytes
+	// Para grabar un archivo en una carpeta con un jfilechooser
+	public static void grabarEnDirectorio(byte[] datos, String nombreArchivo) {
+		// Buscamos donde queremos guardarlo y con que nombre
+		JFileChooser dialogo = new JFileChooser();
+		dialogo.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		File fArchivo = null;
+		if(dialogo.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			System.out.println("Aceptamos guardar en " + dialogo.getSelectedFile()+ File.separator + nombreArchivo);
+			fArchivo = new File(dialogo.getSelectedFile() + File.separator + nombreArchivo);
+			
+			if(datos == null) System.out.println("DATOS NULOS");
+			
+			try {
+				FileOutputStream flujo = new FileOutputStream(fArchivo);
+				flujo.write(datos);
+				flujo.close();
+				System.out.println("Archivo guardado");
+			}
+			catch(Exception e) {
+				System.out.println("No se pudo grabar el archivo: " + e.getMessage());
+			}
+		}
+	}
+	
+	// Para convertir en un file basandose en un array de bytes
 	public static File convertirBytesToArchivo(String nombreArchivo, byte[] buffer) {
 		File archivo = null;
 			

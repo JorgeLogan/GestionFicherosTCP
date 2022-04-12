@@ -71,8 +71,6 @@ public abstract class ClaseBase extends VistaGestor{
 			this.modeloFicheros.addElement(array[i].toString());
 			System.out.println(i + " --> " + array[i]);
 		}
-		System.out.println("Elementos en el modelo: " + this.modeloFicheros.capacity());
-		this.listadoFicheros.updateUI();
 	}
 	
 	/**

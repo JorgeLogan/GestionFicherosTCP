@@ -62,6 +62,8 @@ public class HiloCliente extends Thread{
 					paquete.setArchivos(this.carpeta.leerCarpeta());
 					break;
 				case DESCARGAR:
+					byte[] datos = this.carpeta.cargarArchivo(paquete.getNombreArchivo());
+					paquete.setBuffer(datos);
 					break;
 				case SALIR:
 					this.salir = true;
@@ -95,7 +97,5 @@ public class HiloCliente extends Thread{
 		lista = this.carpeta.leerCarpeta();
 		
 		return lista;
-	}
-	
-	
+	}	
 }
