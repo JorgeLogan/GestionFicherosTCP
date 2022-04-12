@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import paquetes.Paquete;
@@ -43,6 +44,7 @@ public class ClienteFicheros extends ClaseBase{
 		try {
 			// Abrimos la conexion
 			this.socketCliente = new Socket(IP, PUERTO);
+			this.gestionBotones(true);
 			resultado = true;
 		}
 		catch(Exception e) {
@@ -60,11 +62,13 @@ public class ClienteFicheros extends ClaseBase{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.gestionBotones(false);
 	}
 
 	@Override
 	protected void clickSubir() {
-		// TODO Auto-generated method stub
+		System.out.println("Empezamos buscando un archivo para subir");
+		JFileChooser selector = new JFileChooser();
 		
 	}
 

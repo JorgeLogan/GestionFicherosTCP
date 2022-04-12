@@ -8,12 +8,11 @@ import paquetes.Paquete;
 import zona_critica.CarpetaArchivos;
 
 public class HiloCliente extends Thread{
+	
 	private int numId;
 	private Socket sCliente;
 	private CarpetaArchivos carpeta;
 	private boolean salir = false;
-	
-	private boolean ocupado; // Para los metodos sincronizados. para Leer no es necesario, pero lo hago con todo
 	
 	private ObjectInputStream objEntrada;
 	private ObjectOutputStream objSalida;
@@ -81,15 +80,13 @@ public class HiloCliente extends Thread{
 				this.salir = true;
 			}
 		}
-		System.out.println("Saliendo de hilo cliente num. " + this.numId);
 		// Cerramos flujos
 		try {
 			this.objSalida.close();
 			this.objEntrada.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (IOException e) {}
+		
+		System.out.println("Cerrado hilo del cliente/servidor num. " + this.numId);
 	}
 	
 	public String[] leerArchivos(){

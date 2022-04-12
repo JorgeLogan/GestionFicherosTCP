@@ -114,6 +114,9 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 		this.setVisible(true);
 		this.setResizable(false);
 		this.setMinimumSize(new Dimension(WIDTH, HEIGHT));
+		
+		// Configuro los botones en el inicio
+		this.gestionBotones(false);
 	}
 	
 	// Para generar un borde un poco bonito
@@ -158,5 +161,12 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 			this.clickDesconectar();
 			break;
 		}
+	}
+	
+	protected void gestionBotones(boolean conectado) {
+		this.btnConectar.setEnabled(!conectado);
+		this.btnDesconectar.setEnabled(conectado);
+		this.btnSubir.setEnabled(conectado);
+		this.btnBajar.setEnabled(conectado);
 	}
 }

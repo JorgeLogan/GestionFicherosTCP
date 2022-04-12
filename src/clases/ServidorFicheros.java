@@ -63,7 +63,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 			this.servidorTCP = new ServerSocket(PUERTO);
 			Thread miHilo = new Thread(this);
 			miHilo.start();
-			
+			this.gestionBotones(true);
 			resultado = true;
 			
 		}
@@ -90,11 +90,14 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 			} catch (IOException e) {
 				System.out.println("Error al desconectar: " + e.getMessage());
 			}
+			this.gestionBotones(false);
 		}
 	}
 	
 	/**
+	 * Funcion para subir archivo a la carpeta compartida.
 	 * El servidor no necesita enviar un paquete, para trabajar en la zona critica, ya que la carpeta esta en su equipo.
+	 * Asi que abrira un dialogo para seleccionar el archivo y lo pasara con el objeto de carpeta
 	 */
 	@Override
 	protected void clickSubir() {
@@ -229,6 +232,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 				
 			}
 		}
+		System.out.println("Cerrado hilo de escucha de clientes del servidor");
 		
 	}
 }
