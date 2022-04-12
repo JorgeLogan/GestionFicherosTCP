@@ -101,6 +101,54 @@ public class CarpetaArchivos {
 		return resultado;
 	}
 	
+	/**
+	 * Funcion para guardar un archivo de tipo file en la carpeta
+	 * @param archivo el archivo a guardar en la zona critica
+	 * @return true si puede grabarlo, false si no
+	 */
+	public synchronized boolean grabarArchivo(File archivo) {
+		boolean resultado = false;
+		
+		while(this.ocupado) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		this.ocupado = true;
+		
+		// Ya podemos trabajar
+		try {
+			// Preparo el flujo de salida
+			FileOutputStream flujoSalida = new FileOutputStream(CARPETA + archivo.getName());
+			
+			// Preparo el archivo pasado
+			FileInputStream flujoEntrada = new FileInputStream(archivo);
+			
+			// Ahora grabamos en la salida los datos del de entrada
+			flujoSalida.write(flujoEntrada.readAllBytes());
+			
+			// Cerramos flujos
+			flujoSalida.close();
+			flujoEntrada.close();
+			
+			// Retornariamos true si llegamos aqui, porque saldria todo bien
+			resultado = true;
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			resultado = false;
+		}
+		
+		// Liberamos y avisamos
+		this.ocupado = false;
+		notifyAll();
+		
+		return resultado;
+	}
 	
 	/**
 	 * Funcion para cargar de la carpeta de zona critica los datos de un fichero

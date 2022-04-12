@@ -33,9 +33,10 @@ public class Paquete implements Serializable{
 	}
 	
 	// Constructor para envio de bytes de fichero
-	public Paquete(OPCIONES opcion, byte[] buffer) {
+	public Paquete(OPCIONES opcion, byte[] buffer, String nombre) {
 		this.opcion = opcion;
 		this.buffer = buffer;
+		this.nombreArchivo = nombre;
 	}
 	
 	// Constructor para paquete con listado de archivos

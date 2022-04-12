@@ -1,14 +1,17 @@
 package clases;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import paquetes.Paquete;
+import paquetes.Paquete.OPCIONES;
 
 public class ClienteFicheros extends ClaseBase{
 	
@@ -22,8 +25,7 @@ public class ClienteFicheros extends ClaseBase{
 	
 	
 	public ClienteFicheros() {
-		super();
-		
+		super();		
 	}
 	
 	public static void main(String[] args) {
@@ -66,26 +68,8 @@ public class ClienteFicheros extends ClaseBase{
 	}
 
 	@Override
-	protected void clickSubir() {
-		System.out.println("Empezamos buscando un archivo para subir");
-		JFileChooser selector = new JFileChooser();
-		
-	}
-
-	@Override
-	protected void clickDescargar() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	protected void clickSalir() {
-		try {
-			if(this.socketCliente!= null) this.socketCliente.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.clickDesconectar();
 		this.dispose();
 	}
 
@@ -153,5 +137,64 @@ public class ClienteFicheros extends ClaseBase{
 			System.out.println("Error cerrando los flujos del cliente. Ya han sido cerrados por el servidor");
 		}
 		this.desconectarTCP();		
+	}
+
+	@Override
+	protected void subir() {
+		// Primero eligo que archivo quiero subir
+		File archivo = DAOArchivos.getArchivo();
+		
+		// Ahora, compruebo que no exista ese archivo en el listado
+		if(this.modeloFicheros.contains(archivo.getName())) {
+			
+			System.out.println("Ya existe el archivo " + archivo.getName() + "... pido confirmacion");
+			if(JOptionPane.showConfirmDialog(this, "El archivo " + archivo.getName() + 
+					" ya existe... ¿ Quieres sobreescribir?") == JOptionPane.OK_OPTION) {
+			
+				System.out.println("Acepta sobreescribir");
+				
+				this.enviarServidorSubir(archivo);
+			
+			}
+			else {
+				System.out.println("No acepta sobreescribir, asi que no hacemos nada");
+			}
+		}
+		else { // No existia el archivo, asi que lo grabo sin medias tintas :)
+			this.enviarServidorSubir(archivo);
+		}
+		
+	}
+
+	public void enviarServidorSubir(File archivo) {
+		// Preparo un paquete para subir el fichero
+		byte[] buffer = DAOArchivos.convertirFileToBytes(archivo);
+		Paquete paquete = new Paquete(OPCIONES.SUBIR, buffer, archivo.getName());
+		
+		// Intento enviar el objeto
+		try {
+			this.objSalida = new ObjectOutputStream(this.socketCliente.getOutputStream());
+			this.objSalida.writeObject(paquete);
+			
+			// Y ahora, espero respuesta, en la que recibiré la carpeta actualizada
+			//this.objEntrada = new ObjectInputStream(this.socketCliente.getInputStream());
+			System.out.println("Esperamos por el paquete respuesta");
+			paquete = (Paquete)this.objEntrada.readObject();
+		
+			// Limpiamos el listado, y pasamos los elementos recibidos en el paquete
+			this.modeloFicheros.clear();
+			for(String nombre : paquete.getArchivos()) this.modeloFicheros.addElement(nombre);
+			System.out.println("recibida respuesta y actualizados los datos");
+		} 
+		catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	protected void descargar() {
+		// TODO Auto-generated method stub
+		
 	}
 }

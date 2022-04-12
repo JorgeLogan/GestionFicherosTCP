@@ -33,7 +33,6 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 	boolean salir = false;
 	ServerSocket servidorTCP = null;
 	List<Socket> listaClientes = new LinkedList<Socket>();
-	CarpetaArchivos carpeta;
 
 	/**
 	 * Clase principal que hara el servidor ejecutable
@@ -44,7 +43,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 		new ServidorFicheros();
 	}
 	
-	/*^^
+	/*
 	 * Constructor de la clase
 	 */
 	public ServidorFicheros() {
@@ -99,32 +98,36 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 	 * El servidor no necesita enviar un paquete, para trabajar en la zona critica, ya que la carpeta esta en su equipo.
 	 * Asi que abrira un dialogo para seleccionar el archivo y lo pasara con el objeto de carpeta
 	 */
-	@Override
-	protected void clickSubir() {
+	// Funcion para subir un archivo a la carpeta de la zona critica
+		// El servidor es el que tiene la carpeta de la zona critica, asi que no necesita enviar ningun
+		// paquete, accede a ella y listo ( a traves de los metodos sincronizados, eso si)
+	@Override	
+	protected void subir() {
 		System.out.println("Intento abrir dialogo");
-		
+			
 		// Abrimos un dialogo para escoger archivos
 		JFileChooser d  = new JFileChooser();
 		if(d.showDialog(this, "Selecciona un fichero") == JFileChooser.APPROVE_OPTION) {
 			File seleccionado = d.getSelectedFile(); 
-			
+				
 			// Convertimos el archivo a bytes
 			byte[] buffer = null;
 			try {
 				FileInputStream lectorFichero = new FileInputStream(seleccionado.getAbsolutePath());
 				buffer = lectorFichero.readAllBytes();
-				lectorFichero.close();
 				System.out.println("Guardare " + seleccionado.getName());
 				this.carpeta.grabarArchivo(buffer,seleccionado.getName());
-			} catch (Exception e) {
+				lectorFichero.close();
+			}
+			catch (Exception e) {
 				System.out.println("No se pudo guardar el archivo: " + e.getMessage());
 				buffer = null;
 			}
-			
+				
 			// Si todo fue bien, ya tenemos el buffer para grabarlo
 			if(buffer!= null) {
 				if(this.carpeta.grabarArchivo(buffer, seleccionado.getName())) {
-					JOptionPane.showMessageDialog(this, "Archivo guardado!");
+					JOptionPane.showMessageDialog(this, "Archivo guardado!");						
 					
 					//Actualizamos el listado
 					String archivos[] = this.carpeta.leerCarpeta();
@@ -138,9 +141,11 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 			}
 
 		}
+	}
 		
-		// Una vez tenemos los archivos, vamos a intentar grabarlos en la carpeta.. siempre que no existan...
-		// En ese caso habria que confirmar la grabacion
+	// Funcion para bajar un archivo de la zona critica, a una carpeta local
+	protected void descargar() {
+			
 	}
 
 	// Para saber si existe un archivo
@@ -163,6 +168,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 	@Override
 	protected void clickSalir() {
 		// TODO Auto-generated method stub
+		this.clickDesconectar();
 		this.dispose();
 		
 	}

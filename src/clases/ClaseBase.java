@@ -8,9 +8,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import paquetes.Paquete;
 import vistas.VistaGestor;
+import zona_critica.CarpetaArchivos;
 
 public abstract class ClaseBase extends VistaGestor{
 	/**
@@ -23,40 +25,13 @@ public abstract class ClaseBase extends VistaGestor{
 	public final static int TAM_MAX_PAQUETE = 1000;
 	public final static int PUERTO = 5678;
 	public final static String IP = "192.168.0.103";
-	
-
-	/**
-	 * Funcion para leer datos de la carpeta
-	 * @return devuelve los nombres de los archivos
-	 */
-	public String[] leerCarpeta() {
-		String listado[] = null;
-		System.out.println("Intentamos leer la carpeta: " + CARPETA);
-		try {
-			File carpeta = new File(CARPETA);
-			listado = carpeta.list();
-		}
-		catch(Exception e) {
-			System.out.println("Error leyendo la carpeta. Error: " + e.getMessage());
-		}
-		System.out.println("Encontramos " + listado.length + " archivos y directorios");
-		return listado;
-	}
+	CarpetaArchivos carpeta; // La zona critica
 	
 	// Cada vez que alguien haga algun cambio deberia notificar a los clientes/servidor para que se
 	// actualize el listado de nuevo:
 	//		El servidor debe avisar a los clientes
 	//		Los clientes al servidor para que éste actualize al resto
 	protected abstract void avisarCambios();
-	
-	
-	// Funciones de conversion
-	// Funcion para convertir un conjunto de bytes en un tipo de paquete de datos
-	protected File convertirBytesToFichero(byte[] datos) {
-		File paquete = null;
-		
-		return paquete;
-	}
 	
 	/**
 	 * Creo una funcion que me convierta el paquete de datos a un array de bytes
@@ -87,23 +62,6 @@ public abstract class ClaseBase extends VistaGestor{
 		return buffer;
 	}
 	
-	// Para grabar un archivo basado en un array de bytes
-	protected File convertirBytesToArchivo(String nombreArchivo, byte[] buffer) {
-		File archivo = null;
-		
-		try {
-			FileOutputStream flujoArchivo = new FileOutputStream(CARPETA + "\\" + archivo);
-			flujoArchivo.write(buffer);
-			flujoArchivo.close();
-		}
-		catch(Exception e) {
-			System.out.println("Error al convertir el flujo de bytes a un archivo: " + e.getMessage());
-		}
-		
-		return archivo;
-	}
-	
-	
 	// Para pasar un listado de strings al listado de la vista
 	protected void pasarListadoToVentana(String[] array) {
 		
@@ -116,17 +74,26 @@ public abstract class ClaseBase extends VistaGestor{
 		System.out.println("Elementos en el modelo: " + this.modeloFicheros.capacity());
 		this.listadoFicheros.updateUI();
 	}
+	
+	/**
+	 * Funcion para el click del boton de subir archivo
+	 */
+	@Override
+	protected void clickSubir() {
+		this.subir();
+	}
 
-	protected File abrirCarpetaLocal() {
-		File f = null;
-		JFileChooser selector = new JFileChooser();
-		if(selector.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			f = selector.getSelectedFile();
-		}
-		
-		return f;
+	/**
+	 * Funcion para el click del boton de descargar archivo
+	 */
+	@Override
+	protected void clickDescargar() {
+		this.descargar();		
 	}
 	
+	// Funciones abstractas para implementarlas en las clases finales
+	protected abstract void subir();
+	protected abstract void descargar();
 	protected abstract boolean conectarTCP();
 	protected abstract void desconectarTCP();
 }
