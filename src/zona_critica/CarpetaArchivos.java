@@ -1,3 +1,4 @@
+package zona_critica;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -75,7 +76,7 @@ public class CarpetaArchivos {
 		ByteArrayOutputStream flujoDatos = new ByteArrayOutputStream();
 		try {
 			// Preparo el flujo de datos de ficheros de salida para grabar el archivo
-			FileOutputStream salida = new FileOutputStream(nombreArchivo);
+			FileOutputStream salida = new FileOutputStream(CARPETA + nombreArchivo);
 			
 			// Grabo los datos
 			salida.write(datos, 0, datos.length);
@@ -99,6 +100,7 @@ public class CarpetaArchivos {
 		// Devolvemos el resultado
 		return resultado;
 	}
+	
 	
 	/**
 	 * Funcion para cargar de la carpeta de zona critica los datos de un fichero

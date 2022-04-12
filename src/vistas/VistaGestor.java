@@ -126,7 +126,7 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 	
 	// Clases abstractas para implementar en los hijos
 	protected abstract void clickSubir();
-	protected abstract void clickBajar();
+	protected abstract void clickDescargar();
 	protected abstract void clickSalir();
 	protected abstract void clickConectar();
 	protected abstract void clickDesconectar();
@@ -141,7 +141,7 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 			break;
 		case "Bajar fichero":
 			System.out.println("Pulsado bajar");
-			this.clickBajar();
+			this.clickDescargar();
 			break;
 		case "Salir":
 			System.out.println("Pulsado salir");
@@ -153,6 +153,8 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 			break;
 		case "Desconectar":
 			System.out.println("Pulsado desconectar");
+			// Limpiamos el listado antes de nada
+			this.modeloFicheros.clear();
 			this.clickDesconectar();
 			break;
 		}

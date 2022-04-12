@@ -1,12 +1,24 @@
 package clases;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import javax.swing.JOptionPane;
 
+import paquetes.Paquete;
+
 public class ClienteFicheros extends ClaseBase{
+	
+	/**
+	 * Pedido por el IDE
+	 */
+	private static final long serialVersionUID = 1L;
 	private Socket socketCliente;
+	private ObjectOutputStream objSalida;
+	private ObjectInputStream objEntrada;
+	
 	
 	public ClienteFicheros() {
 		super();
@@ -29,19 +41,25 @@ public class ClienteFicheros extends ClaseBase{
 		boolean resultado = false;
 		
 		try {
+			// Abrimos la conexion
 			this.socketCliente = new Socket(IP, PUERTO);
 			resultado = true;
 		}
 		catch(Exception e) {
 			System.out.println("No se pudo conectar el cliente! " + e.getMessage());
 		}
-		return false;
+		return resultado;
 	}
 
 	@Override
 	protected void desconectarTCP() {
-		// TODO Auto-generated method stub
-		
+		// Como no estamos logeados para nada en especial, podemos salir cuando queramos
+		try {
+			this.socketCliente.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -51,7 +69,7 @@ public class ClienteFicheros extends ClaseBase{
 	}
 
 	@Override
-	protected void clickBajar() {
+	protected void clickDescargar() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -67,19 +85,70 @@ public class ClienteFicheros extends ClaseBase{
 		this.dispose();
 	}
 
+	/**
+	 * Para empezar, el cliente se conectará, y acto seguido, enviara un paquete donde querra recibir
+	 * el listado de archivos que tiene en la carpeta compartida
+	 */
 	@Override
 	protected void clickConectar() {
 		
 		if(this.conectarTCP() == true) {
 			JOptionPane.showMessageDialog(this, "Conectado al servidor!");
+			
+			// Pido al servidor los datos de la carpeta
+			this.pedirArchivos();
+			
+			// Espero respuesta
+			
+			
 		}else {
 			JOptionPane.showMessageDialog(this, "No te has podido conectar al servidor");
 		}
 	}
 
+	private void pedirArchivos() {
+		// preparo la informacion a enviar al servidor, pidiendole los nombres de la carpeta de archivos
+		Paquete paquete = new Paquete(Paquete.OPCIONES.LEER);
+		
+		try {
+			// Preparo y envio la peticion al hilo del servidor
+			this.objSalida = new ObjectOutputStream(this.socketCliente.getOutputStream());
+			objSalida.writeObject(paquete);
+			
+			// Ahora toca recibir el paquete
+			this.objEntrada = new ObjectInputStream(this.socketCliente.getInputStream());
+			paquete =  (Paquete)this.objEntrada.readObject();
+			
+			// Comprobamos si el paquete vino bien
+			if(paquete.isOperacionOK()) {
+				this.modeloFicheros.clear();
+				// Tambien puede ser que no tengamos el titulo con nuestro id cliente, asi que usamos
+				//   la reutilizacion de la variable de nombre de archivo para ello
+				this.setTitle(paquete.getNombreArchivo());
+				
+				// Ahora si, pasamos los archivos al listado
+				for(String archivo : paquete.getArchivos()) this.modeloFicheros.addElement(archivo);
+			}
+			else {
+				JOptionPane.showMessageDialog(this, "No se pudo realizar la operacion!");
+			}			
+		} 
+		catch (Exception e) {
+			System.out.println("Error en el cliente al intentar pedir los ficheros de la carpeta: " + e.getMessage());
+			JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+		}
+	}
+	
 	@Override
 	protected void clickDesconectar() {
-		// TODO Auto-generated method stub
-		
+		try {
+			this.objSalida = new ObjectOutputStream(this.socketCliente.getOutputStream());
+			this.objSalida.writeObject(new Paquete(Paquete.OPCIONES.SALIR));
+			this.objSalida.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.desconectarTCP();		
 	}
 }

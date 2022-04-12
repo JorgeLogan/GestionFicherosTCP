@@ -1,6 +1,98 @@
 package paquetes;
 
-public class Paquete {
-	private int opcion; // 0 = leer, 1 = grabar, 2= leer
-	private byte[] buffer; 
+import java.io.Serializable;
+
+/**
+ * El paquete de envio de datos
+ * Lo hago lo mas sencillo que puedo, le pongo un enum para que no sea muy lioso
+ * y le paso un array de bytes donde ira o sera recibida la informacion
+ * 
+ * @author Jorge
+ *
+ */
+public class Paquete implements Serializable{
+	/**
+	 * Pedido por el IDE
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	public static enum OPCIONES { LEER, SUBIR, DESCARGAR, SALIR }; 
+	// Atributos
+	private OPCIONES opcion;
+	private byte[] buffer; // Para la lectura/grabacion de ficheros
+	private String nombreArchivo; // Para saber el archivo a grabar/descargar
+	private String[] archivos; // Para la lectura de la carpeta
+	private boolean operacionOK; // Para las respuestas, que el cliente sepa si fue bien o no.
+	
+	// Constructor base
+	public Paquete() {}
+	
+	// Constructor para peticiones
+	public Paquete(OPCIONES opcion) {
+		this.opcion = opcion;
+	}
+	
+	// Constructor para envio de bytes de fichero
+	public Paquete(OPCIONES opcion, byte[] buffer) {
+		this.opcion = opcion;
+		this.buffer = buffer;
+	}
+	
+	// Constructor para paquete con listado de archivos
+	public Paquete(String[] archivos) {
+		this.archivos = archivos;
+	}
+	
+
+	// Getters y Setters
+	public OPCIONES getOpcion() {
+		return opcion;
+	}
+
+
+	public void setOpcion(OPCIONES opcion) {
+		this.opcion = opcion;
+	}
+
+
+	public byte[] getBuffer() {
+		return buffer;
+	}
+
+
+	public void setBuffer(byte[] buffer) {
+		this.buffer = buffer;
+	}
+	
+	@Override
+	public String toString() {
+		return "Paquete para " + opcion;
+	}
+
+	public String[] getArchivos() {
+		return archivos;
+	}
+
+
+	public void setArchivos(String[] archivos) {
+		this.archivos = archivos;
+	}
+
+
+	public boolean isOperacionOK() {
+		return operacionOK;
+	}
+
+
+	public void setOperacionOK(boolean operacionOK) {
+		this.operacionOK = operacionOK;
+	}
+
+	public String getNombreArchivo() {
+		return nombreArchivo;
+	}
+
+	public void setNombreArchivo(String nombreArchivo) {
+		this.nombreArchivo = nombreArchivo;
+	}
 }

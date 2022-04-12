@@ -7,7 +7,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import interfaces.PaqueteDatos;
+import javax.swing.JFileChooser;
+
+import paquetes.Paquete;
 import vistas.VistaGestor;
 
 public abstract class ClaseBase extends VistaGestor{
@@ -61,7 +63,7 @@ public abstract class ClaseBase extends VistaGestor{
 	 * @param paquete e paquete a transfomar
 	 * @return el array de bytes que forma el objeto
 	 */
-	protected byte[] convertirPaquetesToByte(PaqueteDatos paquete) {
+	protected byte[] convertirPaquetesToByte(Paquete paquete) {
 		byte[] buffer;
 		
 		// Preparamos el flujo de array de bytes
@@ -115,8 +117,16 @@ public abstract class ClaseBase extends VistaGestor{
 		this.listadoFicheros.updateUI();
 	}
 
+	protected File abrirCarpetaLocal() {
+		File f = null;
+		JFileChooser selector = new JFileChooser();
+		if(selector.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			f = selector.getSelectedFile();
+		}
+		
+		return f;
+	}
 	
 	protected abstract boolean conectarTCP();
 	protected abstract void desconectarTCP();
-	
 }
