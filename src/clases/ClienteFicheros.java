@@ -146,8 +146,7 @@ public class ClienteFicheros extends ClaseBase{
 			this.objSalida.writeObject(new Paquete(Paquete.OPCIONES.SALIR));
 			this.objSalida.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Error cerrando los flujos del cliente. Ya han sido cerrados por el servidor");
 		}
 		this.desconectarTCP();		
 	}
