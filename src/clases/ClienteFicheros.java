@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 import paquetes.Paquete;
 import paquetes.Paquete.OPCIONES;
 
-public class ClienteFicheros extends ClaseBase{
+public class ClienteFicheros extends ClaseBase implements Runnable{
 	
 	/**
 	 * Pedido por el IDE
@@ -22,7 +22,7 @@ public class ClienteFicheros extends ClaseBase{
 	private Socket socketCliente;
 	private ObjectOutputStream objSalida;
 	private ObjectInputStream objEntrada;
-	
+	private boolean salir = false; // Para salir de nuestro propio hilo de escucha
 	
 	public ClienteFicheros() {
 		super();		
@@ -34,20 +34,18 @@ public class ClienteFicheros extends ClaseBase{
 	}
 
 	@Override
-	protected void avisarCambios() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	protected boolean conectarTCP() {
 		boolean resultado = false;
-		
+		this.salir = false; // Puede que ya hubieramos desconectado antes, asi que reiniciamos salir
 		try {
 			// Abrimos la conexion
 			this.socketCliente = new Socket(IP, PUERTO);
 			this.gestionBotones(true);
 			resultado = true;
+			
+			// Nos ponemos a la escucha de respuestas o actualizaciones
+			Thread hiloEscucha = new Thread(this);
+			hiloEscucha.start();
 		}
 		catch(Exception e) {
 			System.out.println("No se pudo conectar el cliente! " + e.getMessage());
@@ -57,16 +55,16 @@ public class ClienteFicheros extends ClaseBase{
 
 	@Override
 	protected void desconectarTCP() {
-		// Como no estamos logeados para nada en especial, podemos salir cuando queramos
+		this.salir = true;
 		try {
 			this.socketCliente.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Error al cerrar el socket: " + e.getMessage());
 		}
 		this.gestionBotones(false);
 	}
 
+	// Metodo para el click de salir
 	@Override
 	protected void clickSalir() {
 		this.clickDesconectar();
@@ -82,49 +80,20 @@ public class ClienteFicheros extends ClaseBase{
 		
 		if(this.conectarTCP() == true) {
 			JOptionPane.showMessageDialog(this, "Conectado al servidor!");
-			
-			// Pido al servidor los datos de la carpeta
 			this.pedirArchivos();
-			
-			// Espero respuesta
-			
 			
 		}else {
 			JOptionPane.showMessageDialog(this, "No te has podido conectar al servidor");
 		}
 	}
 
+	/**
+	 * Para pedir el listado de archivos al servidor
+	 */
 	private void pedirArchivos() {
 		// preparo la informacion a enviar al servidor, pidiendole los nombres de la carpeta de archivos
 		Paquete paquete = new Paquete(Paquete.OPCIONES.LEER);
-		
-		try {
-			// Preparo y envio la peticion al hilo del servidor
-			this.objSalida = new ObjectOutputStream(this.socketCliente.getOutputStream());
-			objSalida.writeObject(paquete);
-			
-			// Ahora toca recibir el paquete
-			this.objEntrada = new ObjectInputStream(this.socketCliente.getInputStream());
-			paquete =  (Paquete)this.objEntrada.readObject();
-			
-			// Comprobamos si el paquete vino bien
-			if(paquete.isOperacionOK()) {
-				this.modeloFicheros.clear();
-				// Tambien puede ser que no tengamos el titulo con nuestro id cliente, asi que usamos
-				//   la reutilizacion de la variable de nombre de archivo para ello
-				this.setTitle(paquete.getNombreArchivo());
-				
-				// Ahora si, pasamos los archivos al listado
-				for(String archivo : paquete.getArchivos()) this.modeloFicheros.addElement(archivo);
-			}
-			else {
-				JOptionPane.showMessageDialog(this, "No se pudo realizar la operacion!");
-			}			
-		} 
-		catch (Exception e) {
-			System.out.println("Error en el cliente al intentar pedir los ficheros de la carpeta: " + e.getMessage());
-			JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-		}
+		this.enviarPaquete(paquete);
 	}
 	
 	@Override
@@ -143,6 +112,7 @@ public class ClienteFicheros extends ClaseBase{
 	protected void subir() {
 		// Primero eligo que archivo quiero subir
 		File archivo = DAOArchivos.getArchivo();
+		if(archivo == null) return; // En el caso de cancelar, el archivo sera null
 		
 		// Ahora, compruebo que no exista ese archivo en el listado
 		if(this.modeloFicheros.contains(archivo.getName())) {
@@ -172,19 +142,13 @@ public class ClienteFicheros extends ClaseBase{
 		Paquete paquete = new Paquete(OPCIONES.SUBIR, buffer, archivo.getName());
 		
 		// Y ahora usamos nuestro propio amazon y enviamos el paquete y esperamos respuesta
-		Paquete respuesta = this.enviarPaqueteParaRecibirRespuesta(paquete);
-		
-		if(respuesta != null) {
-			// Limpiamos el listado, y pasamos los elementos recibidos en el paquete
-			this.modeloFicheros.clear();
-			for(String nombre : paquete.getArchivos()) this.modeloFicheros.addElement(nombre);
-			System.out.println("recibida respuesta y actualizados los datos");	
-		}
+		this.enviarPaquete(paquete);
 	}
 	
 	// Funcion para descargar el fichero seleccionado del JList
 	@Override
 	protected void descargar() {
+		System.out.println("Solicitamos descargar un fichero");
 		String archivo = this.listadoFicheros.getSelectedValue();
 		
 		if(archivo == null) return;
@@ -193,31 +157,90 @@ public class ClienteFicheros extends ClaseBase{
 		// Praparamos el paquete de envio
 		Paquete paquete = new Paquete(OPCIONES.DESCARGAR, archivo);
 		
-		// Lo enviamos y recibimos respuesta
-		Paquete respuesta = this.enviarPaqueteParaRecibirRespuesta(paquete);
-	
-		// Si la respuesta no es null, ha ido bien, e intentaremos guardar el fichero
-		if(respuesta != null) {
-			DAOArchivos.grabarEnDirectorio(respuesta.getBuffer(), respuesta.getNombreArchivo());
-		}
+		// Lo enviamos 
+		this.enviarPaquete(paquete);
 	}
 	
-	private Paquete enviarPaqueteParaRecibirRespuesta(Paquete paquete) {
-		Paquete respuesta = null;
-		
+	
+	
+	// Funcion para enviar un paquete. Ya reciiremos respuesta a traves del hilo de escucha esta clase
+	private void enviarPaquete(Paquete paquete) {
+
 		try {
 			// Preparamos y enviamos el paquete.
 			this.objSalida = new ObjectOutputStream(this.socketCliente.getOutputStream());
 			this.objSalida.writeObject(paquete);
-			
-			// Ya lo enviamos, ahora esperamos respuesta			
-			respuesta = (Paquete)this.objEntrada.readObject();
+			System.out.println("Enviado al servidor paquete para " + paquete.getOpcion());
 		}
 		catch(Exception e) {
-			
+			System.out.println("Error enviando paquete al hilo del servidor");
+		}
+	}
+
+	// Hilo de escucha de respuestas o actualizaciones
+	@Override
+	public void run() {
+		// Nos pondremos a la escucha del hilo del servidor
+		// Recibiremos las peticiones que hagamos, o las actualizaciones
+		System.out.println("Inicio del hilo del cliente para la escucha de respuestas");
+		Paquete respuesta = null;
+		
+		
+		try {
+			this.objEntrada = new ObjectInputStream(this.socketCliente.getInputStream());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 		
-		// Devolvemos la respuesta o null si fallo algo
-		return respuesta;
+		while(this.salir == false) {
+			try {
+				// Para el paso de los archivos. Intento ralentizarlo lo posible, ya que no se porque,
+				// siempre me borra el jlist despues de pasarle los datos! No tiene sentido
+				String []listado; // Para el paso de los archivos.
+				
+				System.out.println("Bucle de escucha...");
+				// Esperamos respuesta del servidor, o actualizaciones
+				
+				respuesta = (Paquete)this.objEntrada.readObject();
+
+				System.out.println("Recibida respuesta");
+				// Si la respuesta no es null, ha ido bien, asi que miramos que opcion
+				// tenemos en el paquete para trabajar segun ella
+				if(respuesta != null) {
+					switch(respuesta.getOpcion()) {
+					case LEER:
+						// En este caso, actualizamos nuestra vista
+						if(this.getTitle().length() == 0) this.setTitle(respuesta.getNombreArchivo());
+						//this.modeloFicheros.clear();
+						System.out.println("Actualizamos listado de archivos");
+						listado = respuesta.getArchivos();
+						this.pasarListadoToVentana(listado);
+						break;
+					case SUBIR:
+						//this.modeloFicheros.clear();
+						System.out.println("Actualizamos listado de archivos");
+						// Aqui tambien actualizamos la vista
+						listado = respuesta.getArchivos();
+						this.pasarListadoToVentana(listado);
+						break;
+					case DESCARGAR:
+						System.out.println("hemos recibido (descargado) un archivo del servidor");
+						DAOArchivos.grabarEnDirectorio(respuesta.getBuffer(), respuesta.getNombreArchivo());
+						break;
+					case SALIR:
+						System.out.println("Recibimos del servidor que hay que cerrar hilo de escucha");
+						this.salir = true;
+						break;
+					}
+				}
+			}
+			catch(Exception e) {
+				// Si paso algo en este punto, es que se corto conexion, asi que salimos
+				this.salir = true;
+				System.out.println("Error en la escucha de respuestas desde el servidor -> " + e.getMessage());
+			}
+		}
+		System.out.println("Cerrado hilo de escucha de respuestas del cliente");
 	}
 }

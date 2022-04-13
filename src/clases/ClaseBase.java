@@ -27,11 +27,6 @@ public abstract class ClaseBase extends VistaGestor{
 	public final static String IP = "192.168.0.103";
 	CarpetaArchivos carpeta; // La zona critica
 	
-	// Cada vez que alguien haga algun cambio deberia notificar a los clientes/servidor para que se
-	// actualize el listado de nuevo:
-	//		El servidor debe avisar a los clientes
-	//		Los clientes al servidor para que éste actualize al resto
-	protected abstract void avisarCambios();
 	
 	/**
 	 * Creo una funcion que me convierta el paquete de datos a un array de bytes
@@ -63,14 +58,15 @@ public abstract class ClaseBase extends VistaGestor{
 	}
 	
 	// Para pasar un listado de strings al listado de la vista
-	protected void pasarListadoToVentana(String[] array) {
-		
+	// Sin el sync, la mayoria de las veces no me pasaba el modelo, porque lo vaciaba una vez
+	// rellenado. No se si es un bug. NOTA: Los Modeler estos son un asco
+	protected synchronized void pasarListadoToVentana(String[] array) {
 		this.modeloFicheros.clear();
-		
 		for(int i=0; i<array.length; i++) {
 			this.modeloFicheros.addElement(array[i].toString());
-			System.out.println(i + " --> " + array[i]);
+			
 		}
+		System.out.println("Num elementos cargados: "  + array.length);
 	}
 	
 	/**

@@ -1,19 +1,18 @@
 package clases;
 
-import java.io.ByteArrayInputStream;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import paquetes.Paquete;
+import paquetes.Paquete.OPCIONES;
 import zona_critica.CarpetaArchivos;
 
 /**
@@ -33,6 +32,12 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 	boolean salir = false;
 	ServerSocket servidorTCP = null;
 	List<Socket> listaClientes = new LinkedList<Socket>();
+	
+	// Para actualizar los clientes creo un listado de HilosCliente.
+	// Estuve tentado de hacer otro hilo mas para la escucha, pero suponia demasiado codigo
+	// Tambien pense reformar otra vez todo el codigo quitando el list de sockets superior
+	// Pero al final, decidi ir a lo rapido esta vez para no destrozar el codigo otra vez
+	List<HiloCliente> clientesParaUpdates = new LinkedList<HiloCliente>();
 
 	/**
 	 * Clase principal que hara el servidor ejecutable
@@ -130,8 +135,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 					JOptionPane.showMessageDialog(this, "Archivo guardado!");						
 					
 					//Actualizamos el listado
-					String archivos[] = this.carpeta.leerCarpeta();
-					this.pasarListadoToVentana(archivos);
+					this.actualizarListado();
 				}else {
 					System.out.println("No se pudo guardar el archivo");
 				}
@@ -139,7 +143,6 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 			else {
 				System.out.println("No se pudo guardar el archivo. Buffer nulo");
 			}
-
 		}
 	}
 		
@@ -174,17 +177,10 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 	}
 
 	@Override
-	protected void avisarCambios() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	protected void clickConectar() {
 		if(this.conectarTCP()) {
 			JOptionPane.showMessageDialog(this, "Conectado!");
-			String archivos[] = this.carpeta.leerCarpeta();
-			this.pasarListadoToVentana(archivos);
+			this.actualizarListado();
 		}
 		else {
 			JOptionPane.showMessageDialog(this,"No se pudo conectar, lo siento");
@@ -227,7 +223,8 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 				
 				// Aqui no necesito nicks ni nada, como los acepto directamente, no les pongo filtro
 				// Lo que si voy a hacer, es crear un hilo para el con la clase critica
-				HiloCliente hilo = new HiloCliente(indiceClientes, sCliente, this.carpeta);
+				HiloCliente hilo = new HiloCliente(indiceClientes, sCliente, this.carpeta, this);
+				this.clientesParaUpdates.add(hilo);
 				indiceClientes++;
 				
 			}
@@ -237,7 +234,17 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
 				
 			}
 		}
-		System.out.println("Cerrado hilo de escucha de clientes del servidor");
+		System.out.println("Cerrado hilo de escucha de clientes del servidor");		
+	}
+	
+	// Funcion para actualizar el listado del servidor. La hago sincronizada para evitar problemas
+	public void actualizarListado() {
+		String archivos[] = this.carpeta.leerCarpeta();
+		this.pasarListadoToVentana(archivos);
 		
+		// Ahora mandare actualizar a todos los hilos que tengo en el listado de update
+		for(HiloCliente hc : this.clientesParaUpdates) {
+			hc.actualizar();			
+		}
 	}
 }
