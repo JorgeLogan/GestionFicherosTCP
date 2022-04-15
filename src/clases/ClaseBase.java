@@ -24,7 +24,7 @@ public abstract class ClaseBase extends VistaGestor{
 	public final static String CARPETA = "C:\\Pruebas\\";
 	public final static int TAM_MAX_PAQUETE = 1000;
 	public final static int PUERTO = 5678;
-	public final static String IP = "192.168.0.103";
+	public final static String IP = "192.168.0.112";// "192.168.0.103";
 	CarpetaArchivos carpeta; // La zona critica
 	
 	

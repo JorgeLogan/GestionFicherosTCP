@@ -36,7 +36,7 @@ public class HiloCliente extends Thread{
 			this.objSalida = new ObjectOutputStream(this.sCliente.getOutputStream());
 			this.start();
 		} catch (IOException e) {
-			System.out.println("Error creando el hilo de Servidor/Cliente. No se creará hilo");
+			System.out.println("Error creando el hilo de Servidor/Cliente. No se creara hilo");
 		}
 	}
 	
@@ -85,7 +85,7 @@ public class HiloCliente extends Thread{
 				case DESCARGAR:
 					byte[] datos = this.carpeta.cargarArchivo(paquete.getNombreArchivo());
 					paquete.setBuffer(datos);
-					System.out.println("Preparado paquete con los datos a descargar. Tamaño: " + paquete.getBuffer().length);
+					System.out.println("Preparado paquete con los datos a descargar. Tamanio: " + paquete.getBuffer().length);
 					break;
 				case SALIR:
 					this.salir = true;
