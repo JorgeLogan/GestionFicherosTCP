@@ -9,10 +9,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import clases.ClaseBase;
+
+/**
+ * Zona critica.
+ * Establece la zona donde trabajaremos con el servidor y clientes.
+ * Solo funciona con archivos relativamente pequeños.
+ * He leido que los grandes no funcionan, porque en TCP si sobrepasan un tamaño especifico,
+ * colapsa la red y el paquete no se puede enviar, pero tampoco estoy seguro de si es asi o no
+ *  
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public class CarpetaArchivos {
 
-	public final static String CARPETA = "C:\\Pruebas\\";
+	public final static String CARPETA = ClaseBase.CARPETA;
 	private boolean ocupado = false; // para gestionar la zona critica
+	
 	
 	/**
 	 * Funcion para extraer los archivos y directorios de la carpeta compartida
@@ -42,6 +55,7 @@ public class CarpetaArchivos {
 		return archivos;
 	}
 	
+	
 	/**
 	 * Funcion para saber si ya existe un archivo
 	 * @param archivo El nombre de archivo a buscar
@@ -51,6 +65,7 @@ public class CarpetaArchivos {
 		File fArchivo = new File(archivo);
 		return fArchivo.exists();
 	}
+	
 	
 	/**
 	 * Funcion para grabar un flujo de bytes en un fichero.
@@ -101,6 +116,7 @@ public class CarpetaArchivos {
 		return resultado;
 	}
 	
+	
 	/**
 	 * Funcion para guardar un archivo de tipo file en la carpeta
 	 * @param archivo el archivo a guardar en la zona critica
@@ -149,6 +165,7 @@ public class CarpetaArchivos {
 		
 		return resultado;
 	}
+	
 	
 	/**
 	 * Funcion para cargar de la carpeta de zona critica los datos de un fichero

@@ -18,6 +18,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 
+/**
+ * Clase VistaGestor
+ * Creada para hacer una vista grafica de la aplicacion
+ * 
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public abstract class VistaGestor extends JFrame  implements ActionListener{
 
 	/**
@@ -36,11 +43,15 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 	private JButton btnSubir;
 	private JButton btnSalir;
 	
+	
+	// Constructor
 	public VistaGestor() {
 		super();
 		this.colocarComponentes();
 	}
 	
+	
+	// Metodo para colocar los componentes de la vista
 	public void colocarComponentes() {
 		// Creamos un panel general
 		JPanel pGeneral = new JPanel(new BorderLayout());
@@ -63,11 +74,9 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 		pSuperior.add(this.btnConectar);
 		pSuperior.add(new JLabel(" "));
 		pSuperior.add(this.btnDesconectar);
-
 		
 		JPanel pCentral = new JPanel();
 		pGeneral.add(pCentral, BorderLayout.CENTER);
-		
 		
 		JPanel pFicheros = new JPanel();
 		pFicheros.setLayout(new BoxLayout(pFicheros, BoxLayout.Y_AXIS));
@@ -119,6 +128,7 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 		this.gestionBotones(false);
 	}
 	
+	
 	// Para generar un borde un poco bonito
 	private Border bordePersonalizado() {
 		return BorderFactory.createCompoundBorder(
@@ -127,12 +137,14 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 				);
 	}
 	
+	
 	// Clases abstractas para implementar en los hijos
 	protected abstract void clickSubir();
 	protected abstract void clickDescargar();
 	protected abstract void clickSalir();
 	protected abstract void clickConectar();
 	protected abstract void clickDesconectar();
+	
 	
 	// Funcion para el control de eventos
 	@Override
@@ -163,6 +175,8 @@ public abstract class VistaGestor extends JFrame  implements ActionListener{
 		}
 	}
 	
+	
+	// Metodo para gestionar los botones segun el estado de conexion
 	protected void gestionBotones(boolean conectado) {
 		this.btnConectar.setEnabled(!conectado);
 		this.btnDesconectar.setEnabled(conectado);

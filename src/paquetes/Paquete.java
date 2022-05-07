@@ -24,14 +24,17 @@ public class Paquete implements Serializable{
 	private String[] archivos; // Para la lectura de la carpeta
 	private boolean operacionOK; // Para las respuestas, que el cliente sepa si fue bien o no.
 	
+	
 	// Creo una serie de constructores un poco especializados para cada operacion, para minimizar un poco el codigo fuera
 	// Constructor base
 	public Paquete() {}
+	
 	
 	// Constructor para peticiones
 	public Paquete(OPCIONES opcion) {
 		this.opcion = opcion;
 	}
+	
 	
 	// Constructor para envio de bytes de fichero de cara a grabar
 	public Paquete(OPCIONES opcion, byte[] buffer, String nombre) {
@@ -40,10 +43,12 @@ public class Paquete implements Serializable{
 		this.nombreArchivo = nombre;
 	}
 	
+	
 	// Constructor para paquete con listado de archivos
 	public Paquete(String[] archivos) {
 		this.archivos = archivos;
 	}
+	
 	
 	// Constructor especializado para paquetes de peticion descarga de archvio
 	public Paquete(OPCIONES opcion, String nombreArchivo) {
@@ -51,6 +56,7 @@ public class Paquete implements Serializable{
 		this.nombreArchivo = nombreArchivo;
 	}
 
+	
 	// Getters y Setters
 	public OPCIONES getOpcion() {
 		return opcion;
@@ -71,11 +77,13 @@ public class Paquete implements Serializable{
 		this.buffer = buffer;
 	}
 	
+	
 	@Override
 	public String toString() {
 		return "Paquete para " + opcion;
 	}
 
+	
 	public String[] getArchivos() {
 		return archivos;
 	}

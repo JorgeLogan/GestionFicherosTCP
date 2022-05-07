@@ -10,6 +10,7 @@ import paquetes.Paquete.OPCIONES;
 import zona_critica.CarpetaArchivos;
 
 /**
+ * Clase HiloCliente
  * Clase para ser creada por el servidor y ser un hilo puente entre este y el cliente
  * @author Jorge
  *
@@ -25,6 +26,8 @@ public class HiloCliente extends Thread{
 	private ObjectInputStream objEntrada;
 	private ObjectOutputStream objSalida;
 	
+	
+	// Constuctor
 	public HiloCliente(int numId, Socket sCliente, CarpetaArchivos carpeta, ServidorFicheros servidor){
 		this.numId = numId;
 		this.sCliente = sCliente;
@@ -40,6 +43,7 @@ public class HiloCliente extends Thread{
 		}
 	}
 	
+	
 	/**
 	 * Creo una funcion para actualizar el servidor.
 	 * @param archivos los archivos a pasar
@@ -48,6 +52,8 @@ public class HiloCliente extends Thread{
 		this.servidor.actualizarListado();
 	}
 	
+	
+	// Metodo del hilo
 	@Override
 	public void run() {
 		System.out.println("Hilo cliente " + this.numId + " creado e iniciado!!");
@@ -116,6 +122,8 @@ public class HiloCliente extends Thread{
 		System.out.println("Cerrado hilo del cliente/servidor num. " + this.numId);
 	}
 	
+	
+	// Metodo para devolver el listado de archivos en la carpeta
 	public String[] leerArchivos(){
 		String[] lista = null;
 				

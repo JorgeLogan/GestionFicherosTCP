@@ -1,19 +1,21 @@
 package clases;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import paquetes.Paquete;
 import vistas.VistaGestor;
 import zona_critica.CarpetaArchivos;
 
+/**
+ * Clase Base.
+ * De esta clase heredaran tanto servidor como clientes
+ * Es necesario tener en C:\ la carpeta Pruebas para poder trabajar, ya que es la carpeta compartida
+ * 
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public abstract class ClaseBase extends VistaGestor{
 	/**
 	 * Solicitado por el IDE
@@ -24,7 +26,7 @@ public abstract class ClaseBase extends VistaGestor{
 	public final static String CARPETA = "C:\\Pruebas\\";
 	public final static int TAM_MAX_PAQUETE = 1000;
 	public final static int PUERTO = 5678;
-	public final static String IP = "192.168.0.112";// "192.168.0.103";
+	public final static String IP = "localhost";// "192.168.0.3";
 	CarpetaArchivos carpeta; // La zona critica
 	
 	
@@ -56,6 +58,7 @@ public abstract class ClaseBase extends VistaGestor{
 		
 		return buffer;
 	}
+
 	
 	// Para pasar un listado de strings al listado de la vista
 	// Sin el sync, la mayoria de las veces no me pasaba el modelo, porque lo vaciaba una vez
@@ -69,6 +72,7 @@ public abstract class ClaseBase extends VistaGestor{
 		System.out.println("Num elementos cargados: "  + array.length);
 	}
 	
+	
 	/**
 	 * Funcion para el click del boton de subir archivo
 	 */
@@ -77,6 +81,7 @@ public abstract class ClaseBase extends VistaGestor{
 		this.subir();
 	}
 
+	
 	/**
 	 * Funcion para el click del boton de descargar archivo
 	 */
@@ -84,6 +89,7 @@ public abstract class ClaseBase extends VistaGestor{
 	protected void clickDescargar() {
 		this.descargar();		
 	}
+	
 	
 	// Funciones abstractas para implementarlas en las clases finales
 	protected abstract void subir();

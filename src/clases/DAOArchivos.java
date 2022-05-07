@@ -6,6 +6,13 @@ import java.io.FileOutputStream;
 
 import javax.swing.JFileChooser;
 
+/**
+ * Clase DAOArchivos
+ * La uso para trabajar con los ficheros de cara a abrirlos con un chooser, o grabarlos en el destino,
+ * y tambien para convertirlos de file a array de bytes y viceversa
+ * @author Jorge
+ *
+ */
 public class DAOArchivos {
 
 	// Para cargar un archivo con un flie chooser
@@ -17,6 +24,7 @@ public class DAOArchivos {
 		}
 		return archivo;
 	}
+	
 	
 	// Para grabar un archivo en una carpeta con un jfilechooser
 	public static void grabarEnDirectorio(byte[] datos, String nombreArchivo) {
@@ -42,6 +50,7 @@ public class DAOArchivos {
 		}
 	}
 	
+	
 	// Para convertir en un file basandose en un array de bytes
 	public static File convertirBytesToArchivo(String nombreArchivo, byte[] buffer) {
 		File archivo = null;
@@ -53,10 +62,10 @@ public class DAOArchivos {
 		}
 		catch(Exception e) {
 			System.out.println("Error al convertir el flujo de bytes a un archivo: " + e.getMessage());
-		}
-		
+		}	
 		return archivo;
 	}
+	
 	
 	// Para convertir un objeto tipo File a array de bytes
 	public static byte[] convertirFileToBytes(File archivo) {

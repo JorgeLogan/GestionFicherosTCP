@@ -6,13 +6,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import paquetes.Paquete;
 import paquetes.Paquete.OPCIONES;
 
+/**
+ * Clase ClienteFicheros
+ * Es la clase ejecutable del cliente
+ * 
+ * @author Jorge Alvarez Ceñal
+ *
+ */
 public class ClienteFicheros extends ClaseBase implements Runnable {
 
     /**
@@ -24,15 +29,21 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
     private ObjectInputStream objEntrada;
     private boolean salir = false; // Para salir de nuestro propio hilo de escucha
 
+   
+    // Constructor vacio
     public ClienteFicheros() {
         super();
     }
 
+    
+    // Metod principal del ejecutable
     public static void main(String[] args) {
         System.out.println("Cliente de gestor de ficheros TCP");
         new ClienteFicheros();
     }
 
+    
+    // Metodo para conectarse. Devuelve true si pudo, y false si no
     @Override
     protected boolean conectarTCP() {
         boolean resultado = false;
@@ -52,6 +63,8 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         return resultado;
     }
 
+    
+    // Metodo para desconectar el TCP
     @Override
     protected void desconectarTCP() {
         this.salir = true;
@@ -63,6 +76,7 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         this.gestionBotones(false);
     }
 
+    
     // Metodo para el click de salir
     @Override
     protected void clickSalir() {
@@ -70,6 +84,7 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         this.dispose();
     }
 
+    
     /**
      * Para empezar, el cliente se conectar�, y acto seguido, enviara un paquete
      * donde querra recibir el listado de archivos que tiene en la carpeta
@@ -87,6 +102,7 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         }
     }
 
+    
     /**
      * Para pedir el listado de archivos al servidor
      */
@@ -96,6 +112,8 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         this.enviarPaquete(paquete);
     }
 
+    
+    // Metodo para desconectar con el click del boton
     @Override
     protected void clickDesconectar() {
         try {
@@ -108,6 +126,8 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         this.desconectarTCP();
     }
 
+    
+    // Metodo para subir un archivo
     @Override
     protected void subir() {
         // Primero eligo que archivo quiero subir
@@ -133,6 +153,7 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         }
     }
 
+    
     // Funcion para enviar un archivo al servidor para grabarlo en la zona critica.
     // Tambien recibira paquete de vuelta con la info de la carpeta actualizada
     public void enviarServidorSubir(File archivo) {
@@ -144,6 +165,7 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         this.enviarPaquete(paquete);
     }
 
+    
     // Funcion para descargar el fichero seleccionado del JList
     @Override
     protected void descargar() {
@@ -162,6 +184,7 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         this.enviarPaquete(paquete);
     }
 
+    
     // Funcion para enviar un paquete. Ya reciiremos respuesta a traves del hilo de escucha esta clase
     private void enviarPaquete(Paquete paquete) {
 
@@ -175,6 +198,7 @@ public class ClienteFicheros extends ClaseBase implements Runnable {
         }
     }
 
+    
     // Hilo de escucha de respuestas o actualizaciones
     @Override
     public void run() {

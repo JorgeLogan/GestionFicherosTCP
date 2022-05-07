@@ -10,15 +10,14 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import paquetes.Paquete;
-import paquetes.Paquete.OPCIONES;
 import zona_critica.CarpetaArchivos;
 
 /**
+ * Clase ServidorFicheros
  * Creo un servidor de archivos, que creara un hilo por cada cliente que se
- * conecte a su red
+ * conecte a su red. Conectara con la carpeta C:\Pruebas para trabajar con ella
  *
- * @author Jorge
+ * @author Jorge Alvarez Ceñal
  *
  */
 public class ServidorFicheros extends ClaseBase implements Runnable {
@@ -39,6 +38,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
     // Pero al final, decidi ir a lo rapido esta vez para no destrozar el codigo otra vez
     List<HiloCliente> clientesParaUpdates = new LinkedList<HiloCliente>();
 
+    
     /**
      * Clase principal que hara el servidor ejecutable
      *
@@ -49,6 +49,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         new ServidorFicheros();
     }
 
+    
     /*
 	 * Constructor de la clase
      */
@@ -58,6 +59,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         this.carpeta = new CarpetaArchivos();
     }
 
+    
     /*
 	 * Metodo sobreescrito de la clase base para conectar por TCP
      */
@@ -78,6 +80,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         return resultado;
     }
 
+    
     /**
      * Metodo sobreescrito de la clase base para desconectar por TCP
      */
@@ -100,6 +103,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         }
     }
 
+    
     /**
      * Funcion para subir archivo a la carpeta compartida. El servidor no
      * necesita enviar un paquete, para trabajar en la zona critica, ya que la
@@ -147,6 +151,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         }
     }
 
+    
     // Funcion para bajar un archivo de la zona critica, a una carpeta local
     protected void descargar() {
         String archivo = this.listadoFicheros.getSelectedValue();
@@ -160,17 +165,22 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         DAOArchivos.grabarEnDirectorio(buffer, archivo);
     }
 
+    
     // Para saber si existe un archivo
     public boolean existeArchivoEnCarpeta(String archivo) {
         File arch = new File(CARPETA + archivo);
         return arch.exists();
     }
 
+
+    // Metodo para llamar a descargar con el click del boton
     @Override
     protected void clickDescargar() {
         this.descargar();
     }
 
+    
+    // Metodo para salir de la aplicacion con el click
     @Override
     protected void clickSalir() {
         // TODO Auto-generated method stub
@@ -178,6 +188,8 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         this.dispose();
     }
 
+    
+    // Metodo para conectarse por TCP
     @Override
     protected void clickConectar() {
         if (this.conectarTCP()) {
@@ -188,14 +200,17 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         }
     }
 
+    
+    // Metodo que llama a la funcion de desconectar con el click del boton
     @Override
     protected void clickDesconectar() {
         this.desconectarTCP();
     }
 
+    
+    // Metodo para desconectar un clietne a traves de su socket
     private void desconectarCliente(Socket socket) {
         try {
-
             socket.close();
         } catch (Exception e) {
             System.out.println("Error al cerrar el socket cliente: " + e.getMessage());
@@ -238,6 +253,7 @@ public class ServidorFicheros extends ClaseBase implements Runnable {
         System.out.println("Cerrado hilo de escucha de clientes del servidor");
     }
 
+    
     // Funcion para actualizar el listado del servidor. La hago sincronizada para evitar problemas
     public void actualizarListado() {
         String archivos[] = this.carpeta.leerCarpeta();
